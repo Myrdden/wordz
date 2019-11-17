@@ -32,8 +32,11 @@ const Word = props => {
 
   return elem('div', {className: 'word'},
     elem('h1', {}, props.header),
+    elem('p', {}, props.participle),
+    elem('p', {}, props.gerunds.reduce((str, ger) => str + ' ' + ger, 'Gerund:')),
+    elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
     elem('button', {onClick: e => toggleChart(e)}, 'clicc'),
-    Chart({shown: shown})
+    elem(Chart, {shown: shown, data: props.stems}, null)
   );
 };
 
@@ -42,15 +45,14 @@ const Chart = props => {
     return (props.shown ? 'chart' : 'hidden');
   };
 
-  const headers = ['', 'One', 'Two', 'Three', 'Four'];
-  const rowHeaders = ['First', 'Second', 'Third', 'Fourth'];
-  const data = [[1,2,3,4], [5,6,7,8], [9,10,11,12], [13,14,15,16]];
+  const headers = ['', 'Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
+  const rowHeaders = ['Absolute', 'Conjunct', 'Compound', 'Complex'];
 
   return elem('div', {className: isShown()},
     elem('table', {},
       elem('tbody', {},
         elem('tr', {}, headers.map((header, i) => elem('th', {key: i}, header))),
-        data.map((row, i) => {
+        props.data.map((row, i) => {
           return elem('tr', {key: i},
             elem('th', {}, rowHeaders[i]),
             row.map((word, i) => elem('td', {key: i}, word)),
@@ -89,14 +91,16 @@ const App = () => {
   }, [data]);
 
   if (data === null) {
-    if (localStorage.getItem('data') !== 'null') {
+    if (localStorage.getItem('data') !== 'null' && localStorage.getItem('data') !== null) {
       setData(JSON.parse(localStorage.getItem('data')));
     }
   }
+  //localStorage.clear();
   console.log(data);
   console.log(localStorage.getItem('data'));
   return elem('div', {},
     elem(Input, {setData: setData}, null),
+    elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
     (data !== {} && data !== null) && elem('div', {},
       elem(Output, {data: data}, null),
       elem(Dictionary, {data: data}, null)
