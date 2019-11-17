@@ -66,9 +66,16 @@ const Chart = props => {
 const Input = ({setData}) => {
   const upload = e => {
     e.preventDefault();
+    localStorage.clear();
     let reader = new FileReader();
     reader.onload = () => {
-      setData(JSON.parse(reader.result));
+      let data = JSON.parse(reader.result);
+      data.sort((a,b) => {
+        let x = a.header.toUpperCase();
+        let y = b.header.toUpperCase();
+        return x < y ? -1 : (x > y ? 1 : 0);
+      });
+      setData(data);
     };
     reader.readAsText(e.target.files[0]);
   };
