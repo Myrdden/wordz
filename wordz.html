@@ -14,7 +14,11 @@ const elem = React.createElement;
 const Dictionary = props => {
   const populate = data => {
     return data.map((word, index) => {
-      return elem(Word, {...word, key: index}, null);
+      if (word.type === 0) {
+        return elem(Noun, {...word, key: index}, null);
+      } else {
+        return elem(Verb, {...word, key: index}, null);
+      }
     });
   }
 
@@ -23,7 +27,13 @@ const Dictionary = props => {
   );
 };
 
-const Word = props => {
+const Noun = props => {
+  return elem('div', {className: 'word'},
+    elem('h1', {}, props.header)
+  );
+};
+
+const Verb = props => {
   const [shown, setShown] = React.useState(false);
   const toggleChart = e => {
     e.preventDefault();

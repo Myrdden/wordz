@@ -1,5 +1,6 @@
 [
   {
+    "type": 1,
     "header": "Yeet",
     "participle": "he",
     "gerunds": [
@@ -17,6 +18,7 @@
     ]
   },
   {
+    "type": 1,
     "header": "Heck",
     "participle": "ye",
     "gerunds": [
