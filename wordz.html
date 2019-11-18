@@ -74,21 +74,30 @@ const Chart = props => {
 };
 
 const AddVerb = () => {
-  const [input, setInput] = React.useState({listLength: 0});
+  const fakeStems = [['','','',''],['','','',''],['','','',''],['','','','']];
+  const [input, setInput] = React.useState({listLength: 0, stems: fakeStems});
 
   const updateInput = e => {
     e.preventDefault();
     let inp = e.target;
     let data = Object.assign({}, input);
-    if (inp.name.match(/li-\d/g)) {
-      let at = parseInt(inp.name.split('-')[1]);
-      if (at === input.listLength) {
-        data.listLength += 1;
-      } else if (at === input.listLength - 1 && inp.value == '') {
-        data.listLength -= 1;
+    if (inp.name.match(/chart-\d+/g)) {
+      let num = inp.name.split('-')[1].padStart(2, '0');
+      let i = parseInt(num[0]);
+      let j = parseInt(num[1]);
+      data.stems[i][j] = inp.value;
+      console.log(data.stems);
+    } else {
+      if (inp.name.match(/li-\d/g)) {
+        let at = parseInt(inp.name.split('-')[1]);
+        if (at === input.listLength) {
+          data.listLength += 1;
+        } else if (at === input.listLength - 1 && inp.value == '') {
+          data.listLength -= 1;
+        }
       }
+      data[inp.name] = inp.value;
     }
-    data[inp.name] = inp.value;
     setInput(data);
     console.log(data);
   };
@@ -110,9 +119,30 @@ const AddVerb = () => {
     elem('ol', {},
       popDefinitions(input.listLength)
     ),
+    elem(EditChart, {data: input.stems}, null),
     elem('input', {type: 'submit', value: 'go', className: 'form-submit'}, null)
   );
 };
+
+const EditChart = ({data}) => {
+  const headers = ['', 'Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
+  const rowHeaders = ['Absolute', 'Conjunct', 'Compound', 'Complex'];
+
+  return elem('div', {className: 'chart'},
+    elem('table', {},
+      elem('tbody', {},
+        elem('tr', {}, headers.map((header, i) => elem('th', {key: i}, header))),
+        data.map((row, i) => {
+          return elem('tr', {key: i},
+            elem('th', {}, rowHeaders[i]),
+            row.map((word, j) => elem('td', {key: (i*10)+j}, elem('input', {type: 'text',
+              className: 'form-chart-input', name: 'chart-' + ((i*10)+j)}, null)))
+          )
+        })
+      )
+    )
+  );
+}
 
 const Input = ({setData}) => {
   const upload = e => {
@@ -212,6 +242,10 @@ ReactDOM.render(elem(App), document.getElementById('root'));
     font-size: 2rem;
     width: 50%;
     display: block;
+  }
+
+  .form-chart-input {
+    width: 100%;
   }
 
   .form-submit {
