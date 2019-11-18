@@ -196,7 +196,29 @@ const App = () => {
   }
 
   const addWord = word => {
+    let mutData = [...data];
+    let wordComp = word.header.toUpperCase();
+    console.log(mutData);
+    mutData.push({});
+    //let mid = data[data.length >>> 1];
+    //if (wordComp > mid.header.toUpperCase()) {
+      let i = data.length;
+      while (i > 0 && wordComp < mutData[i-1].header.toUpperCase()) {
+        mutData[i] = mutData[i-1];
+        i -= 1;
+      }
+      mutData[i] = word;
+    //} else {
+    //  let i = 0;
+    //  while (i < mutData.length && wordComp > mutData[i+1].header.toUpperCase()) {
+    //    mutData[i] = mutData[i+1];
+    //    i += 1;
+    //  }
+    //  mutData[i] = word;
+    //}
+    console.log(mutData);
   };
+
   //localStorage.clear();
   console.log(data);
   console.log(localStorage.getItem('data'));
