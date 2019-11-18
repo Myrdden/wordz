@@ -22,13 +22,13 @@ const Dictionary = props => {
     });
   }
 
-  return elem('div', {},
+  return elem('div', {className: 'container'},
     populate(props.data)
   );
 };
 
 const Noun = props => {
-  return elem('div', {className: 'word'},
+  return elem('div', {className: 'card'},
     elem('h1', {}, props.header)
   );
 };
@@ -40,7 +40,7 @@ const Verb = props => {
     setShown(!shown);
   };
 
-  return elem('div', {className: 'word'},
+  return elem('div', {className: 'card'},
     elem('h1', {}, props.header),
     elem('p', {}, props.participle),
     elem('p', {}, props.gerunds.reduce((str, ger) => str + ' ' + ger, 'Gerund:')),
@@ -129,9 +129,17 @@ ReactDOM.render(elem(App), document.getElementById('root'));
 </script>
 <style>
   .hidden {display: none}
-  .word {
+  .container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+  }
+  .card {
     background: dimgrey;
-    margin: 2rem;
+    width: 45%;
+    padding: 1rem;
+    color: white;
   }
 
   .chart {
