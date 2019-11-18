@@ -74,22 +74,42 @@ const Chart = props => {
 };
 
 const AddVerb = () => {
-  const [input, setInput] = React.useState({});
+  const [input, setInput] = React.useState({listLength: 0});
 
   const updateInput = e => {
     e.preventDefault();
-    let data = {};
-    let form = new FormData(e.target);
-    form.forEach((v,k) => {
-      data[k] = v;
-    });
+    let inp = e.target;
+    let data = Object.assign({}, input);
+    if (inp.name.match(/li-\d/g)) {
+      let at = parseInt(inp.name.split('-')[1]);
+      if (at === input.listLength) {
+        data.listLength += 1;
+      } else if (at === input.listLength - 1 && inp.value == '') {
+        data.listLength -= 1;
+      }
+    }
+    data[inp.name] = inp.value;
     setInput(data);
     console.log(data);
   };
 
-  return elem('form', {className: 'card', onSubmit: e => updateInput(e)},
-    elem('input', {type: 'text', name: 'a', placeholder: 'New Verb', className: 'form-header'}, null),
+  const popDefinitions = length => {
+    let ary = new Array(length);
+    for(let i = 0; i < length; i++) {
+      ary[i] = elem('li', {key: i}, elem('input', {type: 'text', name: 'li-' + i, value: input['li-' + i] || ''}, null));
+    }
+    ary[length] = elem('li', {key: length}, elem('input', {type: 'text', name: 'li-' + length, value: '', onChange: e => updateInput(e)}, null));
+    return ary;
+  };
+
+  return elem('form', {className: 'card', onChange: e => updateInput(e)},
+    elem('input', {type: 'text', name: 'header',
+      placeholder: 'New Verb', className: 'form-header'}, null),
     elem('input', {type: 'text', name: 'b', placeholder: 'b'}, null),
+    elem('h2', {}, 'Definitions:'),
+    elem('ol', {},
+      popDefinitions(input.listLength)
+    ),
     elem('input', {type: 'submit', value: 'go', className: 'form-submit'}, null)
   );
 };
@@ -163,7 +183,16 @@ ReactDOM.render(elem(App), document.getElementById('root'));
     padding: 1rem;
     color: white;
   }
+  h1 {
 
+  }
+  h2 {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+  }
+  ol {
+    margin: 0.5rem 0;
+  }
   .chart {
 
   }
