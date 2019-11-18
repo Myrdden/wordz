@@ -42,8 +42,8 @@ const Verb = props => {
 
   return elem('div', {className: 'card'},
     elem('h1', {}, props.header),
-    elem('p', {}, props.participle),
-    elem('p', {}, props.gerunds.reduce((str, ger) => str + ' ' + ger, 'Gerund:')),
+    //elem('p', {}, props.participle),
+    //elem('p', {}, props.gerunds.reduce((str, ger) => str + ' ' + ger, 'Gerund:')),
     elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
     elem('button', {onClick: e => toggleChart(e)}, 'clicc'),
     elem(Chart, {shown: shown, data: props.stems}, null)
@@ -87,7 +87,7 @@ const AddVerb = ({addWord}) => {
       let j = parseInt(num[1]);
       data.stems[i][j] = inp.value;
     } else {
-      if (inp.name.match(/li-\d/g)) {
+      if (inp.name.match(/li-\d+/g)) {
         let at = parseInt(inp.name.split('-')[1]);
         if (at === input.listLength) {
           data.listLength += 1;
@@ -109,6 +109,13 @@ const AddVerb = ({addWord}) => {
     if (data.header && data.header !== '') {
       newWord.header = data.header;
       newWord.stems = input.stems;
+      let defs = [];
+      for (const key in data) {
+        if (key.match(/li-\d+/g) && data[key] !== '') {
+          defs.push(data[key]);
+        }
+      }
+      newWord.definitions = [...defs];
       addWord(newWord);
     } else {alert('Missing Header');}
   };
@@ -216,6 +223,7 @@ const App = () => {
     //  }
     //  mutData[i] = word;
     //}
+    setData(mutData);
     console.log(mutData);
   };
 
@@ -247,10 +255,14 @@ ReactDOM.render(elem(App), document.getElementById('root'));
     background: dimgrey;
     width: 45%;
     padding: 1rem;
+    margin-bottom: 1rem;
     color: white;
   }
   h1 {
-
+    font-size: 2rem;
+    font-weight: normal;
+    margin: 0;
+    margin-bottom: 0.5rem;
   }
   h2 {
     font-size: 1.2rem;
