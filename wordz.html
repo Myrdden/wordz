@@ -73,7 +73,7 @@ const Chart = props => {
   );
 };
 
-const AddVerb = () => {
+const AddVerb = ({addWord}) => {
   const fakeStems = [['','','',''],['','','',''],['','','',''],['','','','']];
   const [input, setInput] = React.useState({listLength: 0, stems: fakeStems});
 
@@ -86,7 +86,6 @@ const AddVerb = () => {
       let i = parseInt(num[0]);
       let j = parseInt(num[1]);
       data.stems[i][j] = inp.value;
-      console.log(data.stems);
     } else {
       if (inp.name.match(/li-\d/g)) {
         let at = parseInt(inp.name.split('-')[1]);
@@ -99,7 +98,19 @@ const AddVerb = () => {
       data[inp.name] = inp.value;
     }
     setInput(data);
-    console.log(data);
+  };
+
+  const submit = e => {
+    e.preventDefault();
+    let form = new FormData(e.target);
+    let data = {};
+    form.forEach((v, k) => data[k] = v);
+    let newWord = {};
+    if (data.header && data.header !== '') {
+      newWord.header = data.header;
+      newWord.stems = input.stems;
+      addWord(newWord);
+    } else {alert('Missing Header');}
   };
 
   const popDefinitions = length => {
@@ -111,7 +122,7 @@ const AddVerb = () => {
     return ary;
   };
 
-  return elem('form', {className: 'card', onChange: e => updateInput(e)},
+  return elem('form', {className: 'card', onChange: e => updateInput(e), onSubmit: e => submit(e)},
     elem('input', {type: 'text', name: 'header',
       placeholder: 'New Verb', className: 'form-header'}, null),
     elem('input', {type: 'text', name: 'b', placeholder: 'b'}, null),
@@ -183,6 +194,9 @@ const App = () => {
       setData(JSON.parse(localStorage.getItem('data')));
     }
   }
+
+  const addWord = word => {
+  };
   //localStorage.clear();
   console.log(data);
   console.log(localStorage.getItem('data'));
@@ -191,7 +205,7 @@ const App = () => {
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
     (data !== {} && data !== null) && elem('div', {},
       elem(Output, {data: data}, null),
-      elem(AddVerb, {}, null),
+      elem(AddVerb, {addWord: addWord}, null),
       elem(Dictionary, {data: data}, null)
     )
   );
@@ -226,6 +240,7 @@ ReactDOM.render(elem(App), document.getElementById('root'));
   .chart {
 
   }
+  td {text-align: center}
 
   input {
     background: transparent;
