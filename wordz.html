@@ -73,6 +73,27 @@ const Chart = props => {
   );
 };
 
+const AddVerb = () => {
+  const [input, setInput] = React.useState({});
+
+  const updateInput = e => {
+    e.preventDefault();
+    let data = {};
+    let form = new FormData(e.target);
+    form.forEach((v,k) => {
+      data[k] = v;
+    });
+    setInput(data);
+    console.log(data);
+  };
+
+  return elem('form', {className: 'card', onSubmit: e => updateInput(e)},
+    elem('input', {type: 'text', name: 'a', placeholder: 'New Verb', className: 'form-header'}, null),
+    elem('input', {type: 'text', name: 'b', placeholder: 'b'}, null),
+    elem('input', {type: 'submit', value: 'go', className: 'form-submit'}, null)
+  );
+};
+
 const Input = ({setData}) => {
   const upload = e => {
     e.preventDefault();
@@ -120,6 +141,7 @@ const App = () => {
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
     (data !== {} && data !== null) && elem('div', {},
       elem(Output, {data: data}, null),
+      elem(AddVerb, {}, null),
       elem(Dictionary, {data: data}, null)
     )
   );
@@ -144,6 +166,28 @@ ReactDOM.render(elem(App), document.getElementById('root'));
 
   .chart {
 
+  }
+
+  input {
+    background: transparent;
+    color: white;
+    padding: 0.1rem;
+    border: 0.1rem solid white;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  input::placeholder {color: white}
+
+  .form-header {
+    font-size: 2rem;
+    width: 50%;
+    display: block;
+  }
+
+  .form-submit {
+    font-size: 1rem;
+    display: block;
   }
 </style>
 </body>
