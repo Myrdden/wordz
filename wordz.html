@@ -34,23 +34,55 @@ const Noun = props => {
 };
 
 const Verb = props => {
-  const [shown, setShown] = React.useState(false);
-  const toggleChart = e => {
+  const [stemShown, setStemShown] = React.useState(false);
+  const [gerundShown, setGerundShown] = React.useState(false);
+  const toggleGerundChart = e => {
     e.preventDefault();
-    setShown(!shown);
+    setGerundShown(!gerundShown);
+  };
+  const toggleStemChart = e => {
+    e.preventDefault();
+    setStemShown(!stemShown);
   };
 
   return elem('div', {className: 'card'},
     elem('h1', {}, props.header),
-    //elem('p', {}, props.participle),
-    //elem('p', {}, props.gerunds.reduce((str, ger) => str + ' ' + ger, 'Gerund:')),
     elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
-    elem('button', {onClick: e => toggleChart(e)}, 'clicc'),
-    elem(Chart, {shown: shown, data: props.stems}, null)
+    (props.gerunds && elem('div', {},
+      elem('h2', {onClick: e => toggleGerundChart(e)}, 'Gerunds:'),
+      elem(GerundChart, {shown: gerundShown, data: props.gerunds}, null),
+    )),
+    (props.stems && elem('div', {},
+      elem('h2', {onClick: e => toggleStemChart(e)}, 'Stems:'),
+      elem(StemChart, {shown: stemShown, data: props.stems}, null)
+    ))
   );
 };
 
-const Chart = props => {
+const GerundChart = props => {
+  const isShown = () => {
+    return (props.shown ? 'chart' : 'hidden');
+  };
+
+  const headers = ['', 'Construct', 'Normal', 'Genitive', 'Plural', 'Genitive Plural'];
+  const rowHeaders = ['Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
+
+  return elem('div', {className: isShown()},
+    elem('table', {},
+      elem('tbody', {},
+        elem('tr', {}, headers.map((header, i) => elem('th', {key: i}, header))),
+        props.data.map((row, i) => {
+          return elem('tr', {key: i},
+            elem('th', {}, rowHeaders[i]),
+            row.map((word, i) => elem('td', {key: i}, word))
+          )
+        })
+      )
+    )
+  );
+};
+
+const StemChart = props => {
   const isShown = () => {
     return (props.shown ? 'chart' : 'hidden');
   };
@@ -65,7 +97,7 @@ const Chart = props => {
         props.data.map((row, i) => {
           return elem('tr', {key: i},
             elem('th', {}, rowHeaders[i]),
-            row.map((word, i) => elem('td', {key: i}, word)),
+            row.map((word, i) => elem('td', {key: i}, word))
           )
         })
       )
@@ -74,18 +106,19 @@ const Chart = props => {
 };
 
 const AddVerb = ({addWord}) => {
+  const fakeGerunds = [['','','','',''],['','','','',''],['','','','',''],['','','','','']];
   const fakeStems = [['','','',''],['','','',''],['','','',''],['','','','']];
-  const [input, setInput] = React.useState({listLength: 0, stems: fakeStems});
+  const [input, setInput] = React.useState({listLength: 0, gerunds: fakeGerunds, stems: fakeStems});
 
   const updateInput = e => {
     e.preventDefault();
     let inp = e.target;
     let data = Object.assign({}, input);
-    if (inp.name.match(/chart-\d+/g)) {
+    if (inp.name.match(/(gerund-|stem-)\d+/g)) {
       let num = inp.name.split('-')[1].padStart(2, '0');
       let i = parseInt(num[0]);
       let j = parseInt(num[1]);
-      data.stems[i][j] = inp.value;
+      inp.name.match(/gerund/g) ? data.gerunds[i][j] = inp.value : data.stems[i][j] = inp.value;
     } else {
       if (inp.name.match(/li-\d+/g)) {
         let at = parseInt(inp.name.split('-')[1]);
@@ -107,7 +140,9 @@ const AddVerb = ({addWord}) => {
     form.forEach((v, k) => data[k] = v);
     let newWord = {};
     if (data.header && data.header !== '') {
+      newWord.type = 1;
       newWord.header = data.header;
+      newWord.gerunds = input.gerunds;
       newWord.stems = input.stems;
       let defs = [];
       for (const key in data) {
@@ -133,16 +168,39 @@ const AddVerb = ({addWord}) => {
     elem('input', {type: 'text', name: 'header',
       placeholder: 'New Verb', className: 'form-header'}, null),
     elem('input', {type: 'text', name: 'b', placeholder: 'b'}, null),
-    elem('h2', {}, 'Definitions:'),
+    elem('h3', {}, 'Definitions:'),
     elem('ol', {},
       popDefinitions(input.listLength)
     ),
-    elem(EditChart, {data: input.stems}, null),
+    elem('h3', {}, 'Gerunds:'),
+    elem(EditGerundChart, {data: input.gerunds}, null),
+    elem('h3', {}, 'Stems:'),
+    elem(EditStemChart, {data: input.stems}, null),
     elem('input', {type: 'submit', value: 'go', className: 'form-submit'}, null)
   );
 };
 
-const EditChart = ({data}) => {
+const EditGerundChart = ({data}) => {
+  const headers = ['', 'Construct', 'Normal', 'Genitive', 'Plural', 'Genitive Plural'];
+  const rowHeaders = ['Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
+
+  return elem('div', {className: 'chart'},
+    elem('table', {},
+      elem('tbody', {},
+        elem('tr', {}, headers.map((header, i) => elem('th', {key: i}, header))),
+        data.map((row, i) => {
+          return elem('tr', {key: i},
+            elem('th', {}, rowHeaders[i]),
+            row.map((word, j) => elem('td', {key: (i*10)+j}, elem('input', {type: 'text',
+              className: 'form-chart-input', name: 'gerund-' + ((i*10)+j)}, null)))
+          )
+        })
+      )
+    )
+  );
+}
+
+const EditStemChart = ({data}) => {
   const headers = ['', 'Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
   const rowHeaders = ['Absolute', 'Conjunct', 'Compound', 'Complex'];
 
@@ -154,7 +212,7 @@ const EditChart = ({data}) => {
           return elem('tr', {key: i},
             elem('th', {}, rowHeaders[i]),
             row.map((word, j) => elem('td', {key: (i*10)+j}, elem('input', {type: 'text',
-              className: 'form-chart-input', name: 'chart-' + ((i*10)+j)}, null)))
+              className: 'form-chart-input', name: 'stem-' + ((i*10)+j)}, null)))
           )
         })
       )
@@ -250,12 +308,13 @@ ReactDOM.render(elem(App), document.getElementById('root'));
     flex-flow: row wrap;
     justify-content: space-evenly;
     align-items: flex-start;
+    align-content: stretch;
   }
   .card {
     background: dimgrey;
-    width: 45%;
+    flex-grow: 1;
     padding: 1rem;
-    margin-bottom: 1rem;
+    margin: 1rem;
     color: white;
   }
   h1 {
@@ -267,6 +326,12 @@ ReactDOM.render(elem(App), document.getElementById('root'));
   h2 {
     font-size: 1.2rem;
     margin: 0.5rem 0;
+    cursor: pointer;
+  }
+  h2:hover {background: grey;}
+  h3 {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
   }
   ol {
     margin: 0.5rem 0;
@@ -274,7 +339,10 @@ ReactDOM.render(elem(App), document.getElementById('root'));
   .chart {
 
   }
-  td {text-align: center}
+  th {padding: 0 0.25rem}
+  td {
+    text-align: center;
+  }
 
   input {
     background: transparent;
