@@ -128,6 +128,98 @@ const StemChart = props => {
   );
 };
 
+const updateInput = (e, input, setInput) => {
+  e.preventDefault();
+  let inp = e.target;
+  let data = Object.assign({}, input);
+  if (inp.name.match(/(gerund-|stem-|noun-)\d+/g)) {
+    let num = inp.name.split('-')[1].padStart(2, '0');
+    let i = parseInt(num[0]);
+    let j = parseInt(num[1]);
+    if (inp.name.match(/noun/g)) {
+      data.stems[j] = inp.value;
+    } else {inp.name.match(/gerund/g) ? data.gerunds[i][j] = inp.value : data.stems[i][j] = inp.value;}
+  } else {
+    if (inp.name.match(/li-\d+/g)) {
+      let at = parseInt(inp.name.split('-')[1]);
+      if (at === input.listLength) {
+        data.listLength += 1;
+      } else if (at === input.listLength - 1 && inp.value == '') {
+        data.listLength -= 1;
+      }
+    }
+    data[inp.name] = inp.value;
+  }
+  setInput(data);
+};
+
+const popDefinitions = (length, input, setInput) => {
+  let ary = new Array(length);
+  for(let i = 0; i < length; i++) {
+    ary[i] = elem('li', {key: i}, elem('input', {type: 'text', name: 'li-' + i, value: input['li-' + i] || ''}));
+  }
+  ary[length] = elem('li', {key: length}, elem('input', {type: 'text', name: 'li-' + length, value: '', onChange: e => updateInput(e, input, setInput)}));
+  return ary;
+};
+
+const AddNoun = ({addWord, shown}) => {
+  const fakeStems = ['','','','',''];
+  const [input, setInput] = React.useState({listLength: 0, stems: fakeStems});
+
+  const isShown = () => {
+    return (shown ? 'card' : 'hidden');
+  };
+
+  const submit = e => {
+    e.preventDefault();
+    let form = new FormData(e.target);
+    let data = {};
+    form.forEach((v, k) => data[k] = v);
+    let newWord = {};
+    if (data.header && data.header !== '') {
+      newWord.type = 0;
+      newWord.header = data.header;
+      newWord.notes = data.notes;
+      newWord.stems = input.stems;
+      let defs = [];
+      for (const key in data) {
+        if (key.match(/li-\d+/g) && data[key] !== '') {
+          defs.push(data[key]);
+        }
+      }
+      newWord.definitions = [...defs];
+      addWord(newWord);
+    } else {alert('Missing Header');}
+  };
+
+  return elem('form', {id: 'add-noun', className: isShown(), onChange: e => updateInput(e, input, setInput), onSubmit: e => submit(e)},
+    elem('input', {type: 'text', name: 'header',
+      placeholder: 'New Noun', className: 'form-header'}),
+    elem('h3', {}, 'Definitions:'),
+    elem('ol', {},
+      popDefinitions(input.listLength, input, setInput)
+    ),
+    elem('h3', {}, 'Notes:'),
+    elem('textarea', {name: 'notes', form: 'add-noun'}),
+    elem(EditNounChart, {data: input.stems}),
+    elem('input', {type: 'submit', value: 'go', className: 'form-submit'})
+  );
+};
+
+const EditNounChart = ({data}) => {
+  const headers = ['Construct', 'Normal', 'Genitive', 'Plural', 'Gen. Plural'];
+
+  return elem('div', {className: 'chart'},
+    elem('table', {},
+      elem('tbody', {},
+        elem('tr', {}, headers.map((header, i) => elem('th', {key: i}, header))),
+        elem('tr', {}, data.map((word, i) => elem('td', {key: i}, elem('input', {type: 'text', name: 'noun-' + i}))))
+      )
+    )
+  );
+}
+
+
 const AddVerb = ({addWord, shown}) => {
   const fakeGerunds = [['','','','',''],['','','','',''],['','','','',''],['','','','','']];
   const fakeStems = [['','','',''],['','','',''],['','','',''],['','','','']];
@@ -135,29 +227,6 @@ const AddVerb = ({addWord, shown}) => {
 
   const isShown = () => {
     return (shown ? 'card' : 'hidden');
-  };
-
-  const updateInput = e => {
-    e.preventDefault();
-    let inp = e.target;
-    let data = Object.assign({}, input);
-    if (inp.name.match(/(gerund-|stem-)\d+/g)) {
-      let num = inp.name.split('-')[1].padStart(2, '0');
-      let i = parseInt(num[0]);
-      let j = parseInt(num[1]);
-      inp.name.match(/gerund/g) ? data.gerunds[i][j] = inp.value : data.stems[i][j] = inp.value;
-    } else {
-      if (inp.name.match(/li-\d+/g)) {
-        let at = parseInt(inp.name.split('-')[1]);
-        if (at === input.listLength) {
-          data.listLength += 1;
-        } else if (at === input.listLength - 1 && inp.value == '') {
-          data.listLength -= 1;
-        }
-      }
-      data[inp.name] = inp.value;
-    }
-    setInput(data);
   };
 
   const submit = e => {
@@ -183,21 +252,12 @@ const AddVerb = ({addWord, shown}) => {
     } else {alert('Missing Header');}
   };
 
-  const popDefinitions = length => {
-    let ary = new Array(length);
-    for(let i = 0; i < length; i++) {
-      ary[i] = elem('li', {key: i}, elem('input', {type: 'text', name: 'li-' + i, value: input['li-' + i] || ''}));
-    }
-    ary[length] = elem('li', {key: length}, elem('input', {type: 'text', name: 'li-' + length, value: '', onChange: e => updateInput(e)}));
-    return ary;
-  };
-
-  return elem('form', {id: 'add-verb', className: isShown(), onChange: e => updateInput(e), onSubmit: e => submit(e)},
+  return elem('form', {id: 'add-verb', className: isShown(), onChange: e => updateInput(e, input, setInput), onSubmit: e => submit(e)},
     elem('input', {type: 'text', name: 'header',
       placeholder: 'New Verb', className: 'form-header'}),
     elem('h3', {}, 'Definitions:'),
     elem('ol', {},
-      popDefinitions(input.listLength)
+      popDefinitions(input.listLength, input, setInput)
     ),
     elem('h3', {}, 'Notes:'),
     elem('textarea', {name: 'notes', form: 'add-verb'}),
@@ -279,10 +339,16 @@ const Output = ({data}) => {
 const App = () => {
   const [data, setData] = React.useState(null);
   const [showAddVerb, setShowAddVerb] = React.useState(false);
+  const [showAddNoun, setShowAddNoun] = React.useState(false);
 
   const toggleAddVerb = e => {
     e.preventDefault();
     setShowAddVerb(!showAddVerb);
+  };
+
+  const toggleAddNoun = e => {
+    e.preventDefault();
+    setShowAddNoun(!showAddNoun);
   };
 
   React.useEffect(() => {
@@ -319,6 +385,7 @@ const App = () => {
   };
 
   //localStorage.clear();
+  console.log(data);
   return elem('div', {},
     elem(Input, {setData: setData}),
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
@@ -326,6 +393,8 @@ const App = () => {
       elem(Output, {data: data}),
       elem('button', {onClick: e => toggleAddVerb(e)}, 'Add Verb'),
       elem(AddVerb, {addWord: addWord, shown: showAddVerb}),
+      elem('button', {onClick: e => toggleAddNoun(e)}, 'Add Noun'),
+      elem(AddNoun, {addWord: addWord, shown: showAddNoun}),
       elem(Dictionary, {data: data})
     )
   );
