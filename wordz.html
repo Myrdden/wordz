@@ -53,7 +53,7 @@ const Verb = props => {
     )),
     ((props.notes && props.notes !== '') && elem('em', {}, props.notes)),
     (props.gerunds && elem('div', {},
-      elem('h2', {onClick: e => toggleGerundChart(e)}, 'Gerunds:'),
+      elem('h2', {onClick: e => toggleGerundChart(e)}, 'Non-Finite Forms:'),
       elem(GerundChart, {shown: gerundShown, data: props.gerunds}),
     )),
     (props.stems && elem('div', {},
@@ -68,13 +68,13 @@ const GerundChart = props => {
     return (props.shown ? 'chart' : 'hidden');
   };
 
-  const headers = ['', 'Construct', 'Normal', 'Genitive', 'Plural', 'Genitive Plural'];
+  const headers = ['', 'Construct\n(Participle)', 'Normal', 'Genitive', 'Plural', 'Genitive Plural'];
   const rowHeaders = ['Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
 
   return elem('div', {className: isShown()},
     elem('table', {},
       elem('tbody', {},
-        elem('tr', {}, headers.map((header, i) => elem('th', {key: i}, header))),
+        elem('tr', {}, headers.map((header, i) => elem('th', {key: i, style: {whiteSpace: 'pre-wrap'}}, header))),
         props.data.map((row, i) => {
           return elem('tr', {key: i},
             elem('th', {}, rowHeaders[i]),
@@ -181,8 +181,8 @@ const AddVerb = ({addWord, shown}) => {
       popDefinitions(input.listLength)
     ),
     elem('h3', {}, 'Notes:'),
-    elem('h3', {}, 'Gerunds:'),
     elem('textarea', {name: 'notes', form: 'add-verb'}),
+    elem('h3', {}, 'Non-Finite Forms:'),
     elem(EditGerundChart, {data: input.gerunds}),
     elem('h3', {}, 'Stems:'),
     elem(EditStemChart, {data: input.stems}),
