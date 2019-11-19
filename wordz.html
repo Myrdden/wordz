@@ -47,6 +47,7 @@ const Verb = props => {
 
   return elem('div', {className: 'card'},
     elem('h1', {}, (props.header || '!ERR')),
+    (props.class && elem('em', {style: {fontSize: '0.8rem'}}, 'Class ' + props.class + ' Verb')),
     (props.definitions && elem('div', {},
       elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
     )),
