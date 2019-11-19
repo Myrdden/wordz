@@ -46,8 +46,11 @@ const Verb = props => {
   };
 
   return elem('div', {className: 'card'},
-    elem('h1', {}, props.header),
-    elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
+    elem('h1', {}, (props.header || '!ERR')),
+    (props.definitions && elem('div', {},
+      elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
+    )),
+    ((props.notes && props.notes !== '') && elem('em', {}, props.notes)),
     (props.gerunds && elem('div', {},
       elem('h2', {onClick: e => toggleGerundChart(e)}, 'Gerunds:'),
       elem(GerundChart, {shown: gerundShown, data: props.gerunds}, null),
@@ -105,10 +108,14 @@ const StemChart = props => {
   );
 };
 
-const AddVerb = ({addWord}) => {
+const AddVerb = ({addWord, shown}) => {
   const fakeGerunds = [['','','','',''],['','','','',''],['','','','',''],['','','','','']];
   const fakeStems = [['','','',''],['','','',''],['','','',''],['','','','']];
   const [input, setInput] = React.useState({listLength: 0, gerunds: fakeGerunds, stems: fakeStems});
+
+  const isShown = () => {
+    return (shown ? 'card' : 'hidden');
+  };
 
   const updateInput = e => {
     e.preventDefault();
@@ -142,6 +149,7 @@ const AddVerb = ({addWord}) => {
     if (data.header && data.header !== '') {
       newWord.type = 1;
       newWord.header = data.header;
+      newWord.notes = data.notes;
       newWord.gerunds = input.gerunds;
       newWord.stems = input.stems;
       let defs = [];
@@ -164,14 +172,15 @@ const AddVerb = ({addWord}) => {
     return ary;
   };
 
-  return elem('form', {className: 'card', onChange: e => updateInput(e), onSubmit: e => submit(e)},
+  return elem('form', {id: 'add-verb', className: isShown(), onChange: e => updateInput(e), onSubmit: e => submit(e)},
     elem('input', {type: 'text', name: 'header',
       placeholder: 'New Verb', className: 'form-header'}, null),
-    elem('input', {type: 'text', name: 'b', placeholder: 'b'}, null),
     elem('h3', {}, 'Definitions:'),
     elem('ol', {},
       popDefinitions(input.listLength)
     ),
+    elem('h3', {}, 'Notes:'),
+    elem('textarea', {name: 'notes', form: 'add-verb'}, null),
     elem('h3', {}, 'Gerunds:'),
     elem(EditGerundChart, {data: input.gerunds}, null),
     elem('h3', {}, 'Stems:'),
@@ -249,6 +258,12 @@ const Output = ({data}) => {
 
 const App = () => {
   const [data, setData] = React.useState(null);
+  const [showAddVerb, setShowAddVerb] = React.useState(false);
+
+  const toggleAddVerb = e => {
+    e.preventDefault();
+    setShowAddVerb(!showAddVerb);
+  };
 
   React.useEffect(() => {
     localStorage.setItem('data', JSON.stringify(data));
@@ -282,18 +297,16 @@ const App = () => {
     //  mutData[i] = word;
     //}
     setData(mutData);
-    console.log(mutData);
   };
 
   //localStorage.clear();
-  console.log(data);
-  console.log(localStorage.getItem('data'));
   return elem('div', {},
     elem(Input, {setData: setData}, null),
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
     (data !== {} && data !== null) && elem('div', {},
       elem(Output, {data: data}, null),
-      elem(AddVerb, {addWord: addWord}, null),
+      elem('button', {onClick: e => toggleAddVerb(e)}, 'Add Verb'),
+      elem(AddVerb, {addWord: addWord, shown: showAddVerb}, null),
       elem(Dictionary, {data: data}, null)
     )
   );
@@ -355,14 +368,30 @@ ReactDOM.render(elem(App), document.getElementById('root'));
   }
   input::placeholder {color: white}
 
+  textarea {
+    background: transparent;
+    color: white;
+    padding: 0.1rem;
+    border: 0.1rem solid white;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  textarea::placeholder {color: white}
+
+  a {
+    display: block;
+  }
+
   .form-header {
     font-size: 2rem;
     width: 50%;
-    display: block;
+    display: inline-block;
   }
 
   .form-chart-input {
     width: 100%;
+    max-width: 8rem;
   }
 
   .form-submit {
