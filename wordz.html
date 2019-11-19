@@ -29,7 +29,20 @@ const Dictionary = props => {
 
 const Noun = props => {
   return elem('div', {className: 'card'},
-    elem('h1', {}, props.header)
+    elem('h1', {}, (props.header || '!ERR')),
+    elem('em', {style: {fontSize: '0.8rem'}}, 'Noun'),
+    (props.definitions && elem('div', {},
+      elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
+    )),
+    ((props.notes && props.notes !== '') && elem('em', {}, props.notes)),
+    (props.stems && elem('div', {}, elem(NounChart, {data: props.stems})))
+  );
+};
+
+const NounChart = ({data}) => {
+  const headers = ['Construct', 'Normal', 'Genitive', 'Plural', 'Gen. Plural'];
+
+  return elem('div', {className: 'chart'},
     elem('table', {},
       elem('tbody', {},
         elem('tr', {}, headers.map((header, i) => elem('th', {key: i, style: {whiteSpace: 'pre-wrap'}}, header))),
@@ -74,7 +87,7 @@ const GerundChart = props => {
     return (props.shown ? 'chart' : 'hidden');
   };
 
-  const headers = ['', 'Construct\n(Participle)', 'Normal', 'Genitive', 'Plural', 'Genitive Plural'];
+  const headers = ['', 'Construct\n(Participle)', 'Normal', 'Genitive', 'Plural', 'Gen. Plural'];
   const rowHeaders = ['Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
 
   return elem('div', {className: isShown()},
@@ -197,7 +210,7 @@ const AddVerb = ({addWord, shown}) => {
 };
 
 const EditGerundChart = ({data}) => {
-  const headers = ['', 'Construct', 'Normal', 'Genitive', 'Plural', 'Genitive Plural'];
+  const headers = ['', 'Construct', 'Normal', 'Genitive', 'Plural', 'Gen. Plural'];
   const rowHeaders = ['Perfective', 'Imperfective', 'Subjunctive', 'Imperative'];
 
   return elem('div', {className: 'chart'},
@@ -260,7 +273,7 @@ const Input = ({setData}) => {
 
 const Output = ({data}) => {
   let blob = new Blob([JSON.stringify(data)], {type: 'text/plain;charset=utf-8'});
-  return elem('a', {href: URL.createObjectURL(blob), download: 'hecc.txt'}, 'clicc');
+  return elem('a', {href: URL.createObjectURL(blob), download: 'hecc.json'}, 'clicc');
 }
 
 const App = () => {
@@ -285,7 +298,6 @@ const App = () => {
   const addWord = word => {
     let mutData = [...data];
     let wordComp = word.header.toUpperCase();
-    console.log(mutData);
     mutData.push({});
     //let mid = data[data.length >>> 1];
     //if (wordComp > mid.header.toUpperCase()) {
