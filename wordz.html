@@ -15,9 +15,9 @@ const Dictionary = props => {
   const populate = data => {
     return data.map((word, index) => {
       if (word.type === 0) {
-        return elem(Noun, {...word, key: index}, null);
+        return elem(Noun, {...word, key: index});
       } else {
-        return elem(Verb, {...word, key: index}, null);
+        return elem(Verb, {...word, key: index});
       }
     });
   }
@@ -53,11 +53,11 @@ const Verb = props => {
     ((props.notes && props.notes !== '') && elem('em', {}, props.notes)),
     (props.gerunds && elem('div', {},
       elem('h2', {onClick: e => toggleGerundChart(e)}, 'Gerunds:'),
-      elem(GerundChart, {shown: gerundShown, data: props.gerunds}, null),
+      elem(GerundChart, {shown: gerundShown, data: props.gerunds}),
     )),
     (props.stems && elem('div', {},
       elem('h2', {onClick: e => toggleStemChart(e)}, 'Stems:'),
-      elem(StemChart, {shown: stemShown, data: props.stems}, null)
+      elem(StemChart, {shown: stemShown, data: props.stems})
     ))
   );
 };
@@ -166,26 +166,26 @@ const AddVerb = ({addWord, shown}) => {
   const popDefinitions = length => {
     let ary = new Array(length);
     for(let i = 0; i < length; i++) {
-      ary[i] = elem('li', {key: i}, elem('input', {type: 'text', name: 'li-' + i, value: input['li-' + i] || ''}, null));
+      ary[i] = elem('li', {key: i}, elem('input', {type: 'text', name: 'li-' + i, value: input['li-' + i] || ''}));
     }
-    ary[length] = elem('li', {key: length}, elem('input', {type: 'text', name: 'li-' + length, value: '', onChange: e => updateInput(e)}, null));
+    ary[length] = elem('li', {key: length}, elem('input', {type: 'text', name: 'li-' + length, value: '', onChange: e => updateInput(e)}));
     return ary;
   };
 
   return elem('form', {id: 'add-verb', className: isShown(), onChange: e => updateInput(e), onSubmit: e => submit(e)},
     elem('input', {type: 'text', name: 'header',
-      placeholder: 'New Verb', className: 'form-header'}, null),
+      placeholder: 'New Verb', className: 'form-header'}),
     elem('h3', {}, 'Definitions:'),
     elem('ol', {},
       popDefinitions(input.listLength)
     ),
     elem('h3', {}, 'Notes:'),
-    elem('textarea', {name: 'notes', form: 'add-verb'}, null),
     elem('h3', {}, 'Gerunds:'),
-    elem(EditGerundChart, {data: input.gerunds}, null),
+    elem('textarea', {name: 'notes', form: 'add-verb'}),
+    elem(EditGerundChart, {data: input.gerunds}),
     elem('h3', {}, 'Stems:'),
-    elem(EditStemChart, {data: input.stems}, null),
-    elem('input', {type: 'submit', value: 'go', className: 'form-submit'}, null)
+    elem(EditStemChart, {data: input.stems}),
+    elem('input', {type: 'submit', value: 'go', className: 'form-submit'})
   );
 };
 
@@ -201,7 +201,7 @@ const EditGerundChart = ({data}) => {
           return elem('tr', {key: i},
             elem('th', {}, rowHeaders[i]),
             row.map((word, j) => elem('td', {key: (i*10)+j}, elem('input', {type: 'text',
-              className: 'form-chart-input', name: 'gerund-' + ((i*10)+j)}, null)))
+              className: 'form-chart-input', name: 'gerund-' + ((i*10)+j)})))
           )
         })
       )
@@ -221,7 +221,7 @@ const EditStemChart = ({data}) => {
           return elem('tr', {key: i},
             elem('th', {}, rowHeaders[i]),
             row.map((word, j) => elem('td', {key: (i*10)+j}, elem('input', {type: 'text',
-              className: 'form-chart-input', name: 'stem-' + ((i*10)+j)}, null)))
+              className: 'form-chart-input', name: 'stem-' + ((i*10)+j)})))
           )
         })
       )
@@ -247,7 +247,7 @@ const Input = ({setData}) => {
   };
 
   return elem('div', {},
-    elem('input', {type: 'file', name:'file', onChange: e => upload(e)}, null)
+    elem('input', {type: 'file', name:'file', onChange: e => upload(e)})
   );
 };
 
@@ -301,13 +301,13 @@ const App = () => {
 
   //localStorage.clear();
   return elem('div', {},
-    elem(Input, {setData: setData}, null),
+    elem(Input, {setData: setData}),
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
     (data !== {} && data !== null) && elem('div', {},
-      elem(Output, {data: data}, null),
+      elem(Output, {data: data}),
       elem('button', {onClick: e => toggleAddVerb(e)}, 'Add Verb'),
-      elem(AddVerb, {addWord: addWord, shown: showAddVerb}, null),
-      elem(Dictionary, {data: data}, null)
+      elem(AddVerb, {addWord: addWord, shown: showAddVerb}),
+      elem(Dictionary, {data: data})
     )
   );
 };
@@ -327,14 +327,13 @@ ReactDOM.render(elem(App), document.getElementById('root'));
     background: dimgrey;
     flex-grow: 1;
     padding: 1rem;
-    margin: 1rem;
+    margin: 0.5rem;
     color: white;
   }
   h1 {
     font-size: 2rem;
     font-weight: normal;
     margin: 0;
-    margin-bottom: 0.5rem;
   }
   h2 {
     font-size: 1.2rem;
@@ -347,7 +346,8 @@ ReactDOM.render(elem(App), document.getElementById('root'));
     margin: 0.5rem 0;
   }
   ol {
-    margin: 0.5rem 0;
+    margin: 0;
+    margin-bottom: 0.5rem;
   }
   .chart {
 
