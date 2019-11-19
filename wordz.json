@@ -42,5 +42,15 @@
       [13, 14, 15 , 16]
     ],
     "notes": "yeet"
+  },
+  {
+    "type": 0,
+    "header": "Wow",
+    "definitions": [
+      "Great Word",
+      "Super Cool"
+    ],
+    "stems": [1, 2, 3, 4, 5],
+    "notes": "As Spoke by Owen Wilson"
   }
 ]

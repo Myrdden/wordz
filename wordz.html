@@ -30,6 +30,12 @@ const Dictionary = props => {
 const Noun = props => {
   return elem('div', {className: 'card'},
     elem('h1', {}, props.header)
+    elem('table', {},
+      elem('tbody', {},
+        elem('tr', {}, headers.map((header, i) => elem('th', {key: i, style: {whiteSpace: 'pre-wrap'}}, header))),
+        elem('tr', {}, data.map((word, i) => elem('td', {key: i}, word)))
+      )
+    )
   );
 };
 
