@@ -361,26 +361,16 @@ const App = () => {
     }
   }
 
-  const addWord = word => {
+  const addWord = async word => {
     let mutData = [...data];
     let wordComp = word.header.toUpperCase();
-    mutData.push({});
-    //let mid = data[data.length >>> 1];
-    //if (wordComp > mid.header.toUpperCase()) {
-      let i = data.length;
-      while (i > 0 && wordComp < mutData[i-1].header.toUpperCase()) {
-        mutData[i] = mutData[i-1];
-        i -= 1;
-      }
-      mutData[i] = word;
-    //} else {
-    //  let i = 0;
-    //  while (i < mutData.length && wordComp > mutData[i+1].header.toUpperCase()) {
-    //    mutData[i] = mutData[i+1];
-    //    i += 1;
-    //  }
-    //  mutData[i] = word;
-    //}
+    let min = 0, max = mutData.length;
+    while (min < max) {
+      let mid = (min + max) >>> 1;
+      if (mutData[mid].header.toUpperCase() < wordComp) { min = mid + 1; }
+      else { max = mid; }
+    }
+    mutData.splice(min, 0, word);
     setData(mutData);
   };
 
