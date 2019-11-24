@@ -28,15 +28,15 @@ const Dictionary = props => {
 };
 
 const Noun = props => {
-  return elem('div', {className: 'card'},
-    elem('h1', {}, (props.header || '!ERR')),
+  return (props.header && elem('div', {className: 'card'},
+    elem('h1', {}, props.header),
     elem('em', {style: {fontSize: '0.8rem'}}, 'Noun'),
     (props.definitions && elem('div', {},
       elem('ol', {}, props.definitions.map((def, i) => elem('li', {key: i}, def))),
     )),
     ((props.notes && props.notes !== '') && elem('em', {}, props.notes)),
     (props.stems && elem('div', {}, elem(NounChart, {data: props.stems})))
-  );
+  ));
 };
 
 const NounChart = ({data}) => {
@@ -179,8 +179,6 @@ const AddNoun = ({addWord, shown}) => {
     if (data.header && data.header !== '') {
       newWord.type = 0;
       newWord.header = data.header;
-      newWord.notes = data.notes;
-      newWord.stems = input.stems;
       let defs = [];
       for (const key in data) {
         if (key.match(/li-\d+/g) && data[key] !== '') {
@@ -188,6 +186,8 @@ const AddNoun = ({addWord, shown}) => {
         }
       }
       newWord.definitions = [...defs];
+      newWord.notes = data.notes;
+      newWord.stems = input.stems;
       addWord(newWord);
     } else {alert('Missing Header');}
   };
@@ -238,9 +238,6 @@ const AddVerb = ({addWord, shown}) => {
     if (data.header && data.header !== '') {
       newWord.type = 1;
       newWord.header = data.header;
-      newWord.notes = data.notes;
-      newWord.gerunds = input.gerunds;
-      newWord.stems = input.stems;
       let defs = [];
       for (const key in data) {
         if (key.match(/li-\d+/g) && data[key] !== '') {
@@ -248,6 +245,9 @@ const AddVerb = ({addWord, shown}) => {
         }
       }
       newWord.definitions = [...defs];
+      newWord.notes = data.notes;
+      newWord.gerunds = input.gerunds;
+      newWord.stems = input.stems;
       addWord(newWord);
     } else {alert('Missing Header');}
   };
