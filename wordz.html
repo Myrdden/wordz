@@ -310,14 +310,15 @@ const EditStemChart = ({data}) => {
   );
 }
 
-const Input = ({setData, compareFunc}) => {
+const Input = ({setData, setDataAry, compareFunc}) => {
   const upload = e => {
     e.preventDefault();
     localStorage.clear();
     let reader = new FileReader();
     reader.onload = () => {
-      let data = JSON.parse(reader.result).toTree(compareFunc);
-      setData(data);
+      let data = JSON.parse(reader.result);
+      setDataAry(data);
+      setData(data.toTree(compareFunc));
     };
     reader.readAsText(e.target.files[0]);
   };
@@ -338,6 +339,7 @@ const App = () => {
     return a.header < b.header ? -1 : (a.header > b.header ? 1 : 0);
   }
   const [data, setData] = React.useState(null);
+  const [dataAry, setDataAry] = React.useState(null);
   const [showAddVerb, setShowAddVerb] = React.useState(false);
   const [showAddNoun, setShowAddNoun] = React.useState(false);
 
@@ -352,7 +354,11 @@ const App = () => {
   };
 
   React.useEffect(() => {
-    if (data !== null) { localStorage.setItem('data', JSON.stringify(data.toAry())); }
+    if (data !== null) {
+      let ary = data.toAry();
+      setDataAry(ary);
+      localStorage.setItem('data', JSON.stringify(ary));
+    }
   }, [data]);
 
   if (data === null) {
@@ -392,15 +398,15 @@ const App = () => {
 
   //localStorage.clear();
   return elem('div', {},
-    elem(Input, {setData: setData}),
+    elem(Input, {setData: setData, setDataAry: setDataAry, compareFunc: compareFunc}),
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
-    (data !== {} && data !== null) && elem('div', {},
-      elem(Output, {data: data.toAry()}),
+    (dataAry !== {} && dataAry !== null) && elem('div', {},
+      elem(Output, {data: dataAry}),
       elem('button', {onClick: e => toggleAddVerb(e)}, 'Add Verb'),
       elem(AddVerb, {addWord: addWord, shown: showAddVerb}),
       elem('button', {onClick: e => toggleAddNoun(e)}, 'Add Noun'),
       elem(AddNoun, {addWord: addWord, shown: showAddNoun}),
-      elem(Dictionary, {data: data.toAry()})
+      elem(Dictionary, {data: dataAry})
     )
   );
 };
