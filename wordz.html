@@ -375,6 +375,16 @@ const App = () => {
   };
 
   const editWord = async word => {
+    if (data === null) { }
+    else {
+      setData(data => {
+        let mut = new Tree;
+        mut.data = data.data; mut.compare = data.compare;
+        mut.left = data.left; mut.right = data.right; mut.root = data.root;
+        mut.update(word);
+        return mut;
+      });
+    }
   };
 
   const delWord = async word => {

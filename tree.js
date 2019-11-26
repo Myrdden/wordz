@@ -101,7 +101,7 @@ function Tree(data = null, compare = null) {
     },
 
     update: (oldData, newData) => {
-      if (this.pop(oldData)) {
+      if (this._pop(oldData)) {
         this.push(newData);
         return true;
       } else { return false; }
