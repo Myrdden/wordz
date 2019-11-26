@@ -8,6 +8,7 @@
 
 <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src='tree.js'></script>
 <script>
 const elem = React.createElement;
 
@@ -309,18 +310,13 @@ const EditStemChart = ({data}) => {
   );
 }
 
-const Input = ({setData}) => {
+const Input = ({setData, compareFunc}) => {
   const upload = e => {
     e.preventDefault();
     localStorage.clear();
     let reader = new FileReader();
     reader.onload = () => {
-      let data = JSON.parse(reader.result);
-      data.sort((a,b) => {
-        let x = a.header.toUpperCase();
-        let y = b.header.toUpperCase();
-        return x < y ? -1 : (x > y ? 1 : 0);
-      });
+      let data = JSON.parse(reader.result).toTree(compareFunc);
       setData(data);
     };
     reader.readAsText(e.target.files[0]);
@@ -337,6 +333,10 @@ const Output = ({data}) => {
 }
 
 const App = () => {
+  const compareFunc = (a,b) => {
+    if (a === null || b === null) { return 0; }
+    return a.header < b.header ? -1 : (a.header > b.header ? 1 : 0);
+  }
   const [data, setData] = React.useState(null);
   const [showAddVerb, setShowAddVerb] = React.useState(false);
   const [showAddNoun, setShowAddNoun] = React.useState(false);
@@ -352,40 +352,45 @@ const App = () => {
   };
 
   React.useEffect(() => {
-    localStorage.setItem('data', JSON.stringify(data));
+    if (data !== null) { localStorage.setItem('data', JSON.stringify(data.toAry())); }
   }, [data]);
 
   if (data === null) {
     if (localStorage.getItem('data') !== 'null' && localStorage.getItem('data') !== null) {
-      setData(JSON.parse(localStorage.getItem('data')));
+      setData(JSON.parse(localStorage.getItem('data')).toTree(compareFunc));
     }
   }
 
   const addWord = async word => {
-    let mutData = [...data];
-    let wordComp = word.header.toUpperCase();
-    let min = 0, max = mutData.length;
-    while (min < max) {
-      let mid = (min + max) >>> 1;
-      if (mutData[mid].header.toUpperCase() < wordComp) { min = mid + 1; }
-      else { max = mid; }
+    if (data === null) { setData(new Tree(word, compareFunc)); }
+    else {
+      setData(data => {
+        let mut = new Tree;
+        mut.data = data.data; mut.compare = data.compare;
+        mut.left = data.left; mut.right = data.right; mut.root = data.root;
+        mut.push(word);
+        return mut;
+      });
     }
-    mutData.splice(min, 0, word);
-    setData(mutData);
+  };
+
+  const editWord = async word => {
+  };
+
+  const delWord = async word => {
   };
 
   //localStorage.clear();
-  console.log(data);
   return elem('div', {},
     elem(Input, {setData: setData}),
     elem('button', {onClick: () => {setData(null); localStorage.clear();}}, 'Clear'),
     (data !== {} && data !== null) && elem('div', {},
-      elem(Output, {data: data}),
+      elem(Output, {data: data.toAry()}),
       elem('button', {onClick: e => toggleAddVerb(e)}, 'Add Verb'),
       elem(AddVerb, {addWord: addWord, shown: showAddVerb}),
       elem('button', {onClick: e => toggleAddNoun(e)}, 'Add Noun'),
       elem(AddNoun, {addWord: addWord, shown: showAddNoun}),
-      elem(Dictionary, {data: data})
+      elem(Dictionary, {data: data.toAry()})
     )
   );
 };
